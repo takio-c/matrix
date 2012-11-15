@@ -219,7 +219,7 @@ public:
 	virtual Matrix div(const T v) {
 		Matrix d0(row, col);
 		for(int i = 0; i < row; i++){
-			d0[i] = (*this)[i].mul(v);
+			d0[i] = (*this)[i].div(v);
 		}
 		return d0;
 	}
