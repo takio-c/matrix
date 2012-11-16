@@ -136,11 +136,11 @@ public:
 	}
 
 /* debug */
-	virtual Vector& print(void) {
+	virtual Vector& print(std::ostream &os) {
 		for(int i = 0; i < num; i++){
-			std::cout << (*this)[i] << " ";
+			os << (*this)[i] << " ";
 		}
-		std::cout << "\t# Vector: " << "\n";
+		os << "\t# Vector: " << "\n";
 		return *this;
 	}
 };

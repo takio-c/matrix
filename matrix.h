@@ -249,10 +249,10 @@ public:
 	}
 
 /* debug */
-	virtual Matrix& print(void) {
-		std::cout << "# Matrix: " << "\n";
+	virtual Matrix& print(std::ostream &os) {
+		os << "# Matrix: " << "\n";
 		for(int i = 0; i < row; i++){
-			(*this)[i].print();
+			(*this)[i].print(os);
 		}
 		return *this;
 	}
