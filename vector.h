@@ -4,15 +4,15 @@
 template <class T>
 class Vector {
 protected:
-	char*	tag;
-	T*		val;
-	bool	ref;
-	int		num;
-	int		stp;
+	std::string	tag;
+	T*			val;
+	bool		ref;
+	int			num;
+	int			stp;
 
 private:
-	void init(void) {
-		tag = NULL;
+	void init(std::string name="") {
+		tag = name;
 		val = NULL;
 		ref = false;
 		num = 0;
@@ -20,7 +20,6 @@ private:
 	}
 	void create(const int n) {
 		if(n <= 0) throw *this;
-		release();
 		val = new T [n];
 		num = n;
 		stp = 1;
@@ -29,7 +28,6 @@ private:
 	}
 	void reference(T* p, const int n, const int s=1) {
 		if(p == NULL || n <= 0) throw;
-		release();
 		val = p;
 		num = n;
 		stp = s;
@@ -39,25 +37,24 @@ private:
 		if(ref == false && val != NULL){
 			delete [] val;
 		}
-		init();
 	}
 
 public:
-	Vector(const int n) {
-		init();
+	Vector(const int n, std::string name="") {
+		init(name);
 		create(n);
 	}
-	Vector(T* p, const int n, const int s=1) {
-		init();
+	Vector(T* p, const int n, const int s=1, std::string name="") {
+		init(name);
 		reference(p, n, s);
 	}
 	Vector(const Vector* p) {
 		if(p == NULL) throw;
-		init();
+		init(p->tag);
 		reference(p->val, p->num, p->stp);
 	}
 	Vector(const Vector& o) {
-		init();
+		init(o.tag);
 		create(o.num);
 		*this = o;
 	}
@@ -67,6 +64,10 @@ public:
 
 /* implement */
 	// util
+	virtual Vector& SetName(std::string name) {
+		tag = name;
+		return (*this);
+	}
 	virtual int Size(void) {
 		return num;
 	}
@@ -110,7 +111,8 @@ public:
 	// duo
 	virtual Vector operator +(const Vector &s0) {
 		if(this->num != s0.num) throw;
-		Vector<T> d0(*this);
+		Vector<T> d0(num);
+		d0.tag = "(" + this->tag + " + " + s0.tag;
 		for(int i = 0; i < num; i++){
 			d0[i] = (*this)[i] + s0[i];
 		}
@@ -118,7 +120,8 @@ public:
 	}
 	virtual Vector operator -(const Vector &s0) {
 		if(this->num != s0.num) throw;
-		Vector<T> d0(*this);
+		Vector<T> d0(num);
+		d0.tag = "(" + this->tag + " - " + s0.tag;
 		for(int i = 0; i < num; i++){
 			d0[i] = (*this)[i] - s0[i];
 		}
@@ -133,14 +136,14 @@ public:
 		return v;
 	}
 	virtual Vector mul(const T v) {
-		Vector<T> d0(*this);
+		Vector<T> d0(num);
 		for(int i = 0; i < num; i++){
 			d0[i] = (*this)[i] * v;
 		}
 		return d0;
 	}
 	virtual Vector div(const T v) {
-		Vector<T> d0(*this);
+		Vector<T> d0(num);
 		for(int i = 0; i < num; i++){
 			d0[i] = (*this)[i] / v;
 		}
@@ -152,10 +155,11 @@ public:
 		return print(std::cout);
 	}
 	virtual Vector& print(std::ostream &os) {
+		os << "#\t";
 		for(int i = 0; i < num; i++){
-			os << (*this)[i] << " ";
+			os << (*this)[i] << "\t";
 		}
-		os << "\t# Vector: " << "\n";
+		os << "\t# Vector: " << tag << "\n";
 		return *this;
 	}
 };

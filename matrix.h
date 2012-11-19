@@ -4,7 +4,7 @@
 template <class T>
 class Matrix {
 protected:
-	char*		tag;
+	std::string	tag;
 	T*			val;
 	Vector<T>**	pvv;
 	Vector<T>**	pvh;
@@ -13,8 +13,8 @@ protected:
 	int			col;
 
 private:
-	void init(void) {
-		tag = NULL;
+	void init(std::string name="") {
+		tag = name;
 		val = NULL;
 		pvv = 0;
 		pvh = 0;
@@ -24,7 +24,6 @@ private:
 	}
 	void create(const int r, const int c) {
 		if(r <= 0 || c <= 0) throw;
-		release();
 		val = new T [r*c];
 		ref = false;
 		row = r;
@@ -34,7 +33,6 @@ private:
 	}
 	void reference(T* p, const int r, const int c, const int s, const int d) {
 		if(p == NULL || r <= 0 || c <= 0) throw;
-		release();
 		val = p;
 		ref = true;
 		row = r;
@@ -67,25 +65,24 @@ private:
 		if(ref == false && val != NULL){
 			delete [] val;
 		}
-		init();
 	}
 
 public:
-	Matrix(const int r, const int c) {
-		init();
+	Matrix(const int r, const int c, std::string name="") {
+		init(name);
 		create(r,c);
 	}
-	Matrix(T* p, const int r, const int c) {
-		init();
+	Matrix(T* p, const int r, const int c, std::string name="") {
+		init(name);
 		reference(p,r,c,1,c);
 	}
-	Matrix(T* p, const int r, const int c, const int s, const int d) {
-		init();
+	Matrix(T* p, const int r, const int c, const int s, const int d, std::string name="") {
+		init(name);
 		reference(p,r,c,s,d);
 	}
 	Matrix(const Matrix* p) {
 		if(p == NULL) throw;
-		init();
+		init(p->tag);
 		val = p->val;
 		pvv = new Vector<T>* [p->col];
 		for(int i = 0; i < p->col; i++){
@@ -100,7 +97,7 @@ public:
 		col = p->col;
 	}
 	Matrix(const Matrix& o) {
-		init();
+		init(o.tag);
 		create(o.row, o.col);
 		*this = o;
 	}
@@ -110,6 +107,10 @@ public:
 
 /* implement */
 	// util
+	virtual Matrix& SetName(std::string name) {
+		tag = name;
+		return (*this);
+	}
 	virtual int Row(void) {
 		return row;
 	}
@@ -176,6 +177,7 @@ public:
 	virtual Matrix ide() {
 		if(row != col) throw;
 		Matrix d0(row, col);
+		d0.tag += "'IDE";
 		for(int i = 0; i < row; i++){
 			d0[i][i] = (T)(1);
 		}
@@ -185,6 +187,7 @@ public:
 		Matrix d0(this);
 		Vector<T>** p = d0.pvv;
 		int i = d0.col;
+		d0.tag += "'TRA";
 		d0.pvv = d0.pvh;
 		d0.pvh = p;
 		d0.col = d0.row;
@@ -195,6 +198,7 @@ public:
 		if(row != col) throw;
 		Matrix inv(row, col);
 		Matrix src(*this);
+		inv.tag += "'INV";
 		inv = inv.ide();
 		for(int i = 0; i < row; i++){
 			if(src[i][i] == (T)(0)){
@@ -242,6 +246,7 @@ public:
 	virtual Matrix operator +(const Matrix &s0) {
 		if(this->row != s0.row) throw;
 		Matrix d0(row, col);
+		d0.tag = "(" + this->tag + " + " + s0.tag + ")";
 		for(int i = 0; i < row; i++){
 			d0[i] = (*this)[i] + s0[i];
 		}
@@ -250,6 +255,7 @@ public:
 	virtual Matrix operator -(const Matrix &s0) {
 		if(this->row != s0.row) throw;
 		Matrix d0(row, col);
+		d0.tag = "(" + this->tag + " - " + s0.tag + ")";
 		for(int i = 0; i < row; i++){
 			d0[i] = (*this)[i] - s0[i];
 		}
@@ -258,6 +264,7 @@ public:
 	virtual Matrix operator *(const Matrix &s0) {
 		if(this->col != s0.row) throw;
 		Matrix d0(this->row, s0.col);
+		d0.tag = "(" + this->tag + " * " + s0.tag + ")";
 		for(int i = 0; i < d0.row; i++){
 			for(int j = 0; j < d0.col; j++){
 				d0[i][j] = (*this)[i] * s0(j);
@@ -271,7 +278,7 @@ public:
 		return print(std::cout);
 	}
 	virtual Matrix& print(std::ostream &os) {
-		os << "# Matrix: " << "\n";
+		os << "# Matrix: " << tag << "\n";
 		for(int i = 0; i < row; i++){
 			(*this)[i].print(os);
 		}
