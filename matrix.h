@@ -23,6 +23,7 @@ private:
 		col = 0;
 	}
 	void create(const int r, const int c) {
+		if(r <= 0 || c <= 0) throw;
 		release();
 		val = new T [r*c];
 		ref = false;
@@ -32,6 +33,7 @@ private:
 		memset(val, 0x00, sizeof(T)*r*c);
 	}
 	void reference(T* p, const int r, const int c, const int s, const int d) {
+		if(p == NULL || r <= 0 || c <= 0) throw;
 		release();
 		val = p;
 		ref = true;
@@ -82,6 +84,7 @@ public:
 		reference(p,r,c,s,d);
 	}
 	Matrix(const Matrix* p) {
+		if(p == NULL) throw;
 		init();
 		val = p->val;
 		pvv = new Vector<T>* [p->col];
@@ -117,6 +120,7 @@ public:
 		return Set(p,1,col);
 	}
 	virtual Matrix& Set(const T* p, const int s, const int d) {
+		if(p == NULL) throw;
 		for(int i = 0; i < row; i++){
 			for(int j = 0; j < col; j++){
 				(*this)[i][j] = *(p + d*i + s*j);
@@ -125,6 +129,7 @@ public:
 		return *this;
 	}
 	virtual Matrix& Dia(const T* p, const int s=1) {
+		if(p == NULL) throw;
 		for(int i = 0; i < row; i++){
 			(*this)[i][i] = *(p + s*i);
 		}
@@ -132,41 +137,47 @@ public:
 	}
 	// uni
 	virtual Vector<T>& operator [](const int i) {
+		if(i < 0 || row < i) throw;
 		return *(pvh[i]);
 	}
 	virtual const Vector<T>& operator [](const int i) const {
+		if(i < 0 || row < i) throw;
 		return *(pvh[i]);
 	}
 	virtual Vector<T>& operator ()(const int i) {
+		if(i < 0 || col < i) throw;
 		return *(pvv[i]);
 	}
 	virtual const Vector<T>& operator ()(const int i) const {
+		if(i < 0 || col < i) throw;
 		return *(pvv[i]);
 	}
 	virtual const Matrix& operator =(const Matrix &s0) {
+		if(this->row != s0.row) throw;
 		for(int i = 0; i < row; i++){
 			(*this)[i] = s0[i];
 		}
 		return *this;
 	}
 	virtual const Matrix& operator +=(const Matrix &s0) {
+		if(this->row != s0.row) throw;
 		for(int i = 0; i < row; i++){
 			(*this)[i] += s0[i];
 		}
 		return *this;
 	}
 	virtual const Matrix& operator -=(const Matrix &s0) {
+		if(this->row != s0.row) throw;
 		for(int i = 0; i < row; i++){
 			(*this)[i] -= s0[i];
 		}
 		return *this;
 	}
 	virtual Matrix ide() {
+		if(row != col) throw;
 		Matrix d0(row, col);
-		if(row == col){
-			for(int i = 0; i < row; i++){
-				d0[i][i] = (T)(1);
-			}
+		for(int i = 0; i < row; i++){
+			d0[i][i] = (T)(1);
 		}
 		return d0;
 	}
@@ -181,6 +192,7 @@ public:
 		return d0;
 	}
 	virtual Matrix inv() {
+		if(row != col) throw;
 		Matrix inv(row, col);
 		Matrix src(*this);
 		inv = inv.ide();
@@ -194,7 +206,10 @@ public:
 					}
 				}
 			}
-			{
+			if(src[i][i] == (T)(0)){
+				throw *this;
+			}
+			else{
 				T v = src[i][i];
 				src[i] = src[i].div(v);
 				inv[i] = inv[i].div(v);
@@ -225,6 +240,7 @@ public:
 	}
 	// duo
 	virtual Matrix operator +(const Matrix &s0) {
+		if(this->row != s0.row) throw;
 		Matrix d0(row, col);
 		for(int i = 0; i < row; i++){
 			d0[i] = (*this)[i] + s0[i];
@@ -232,6 +248,7 @@ public:
 		return d0;
 	}
 	virtual Matrix operator -(const Matrix &s0) {
+		if(this->row != s0.row) throw;
 		Matrix d0(row, col);
 		for(int i = 0; i < row; i++){
 			d0[i] = (*this)[i] - s0[i];
@@ -239,6 +256,7 @@ public:
 		return d0;
 	}
 	virtual Matrix operator *(const Matrix &s0) {
+		if(this->col != s0.row) throw;
 		Matrix d0(this->row, s0.col);
 		for(int i = 0; i < d0.row; i++){
 			for(int j = 0; j < d0.col; j++){
@@ -249,6 +267,9 @@ public:
 	}
 
 /* debug */
+	virtual Matrix& print(void) {
+		return print(std::cout);
+	}
 	virtual Matrix& print(std::ostream &os) {
 		os << "# Matrix: " << "\n";
 		for(int i = 0; i < row; i++){
