@@ -278,7 +278,7 @@ public:
 		return print(std::cout);
 	}
 	virtual Matrix& print(std::ostream &os) {
-		os << "# Matrix: " << tag << "\n";
+		os << "# Matrix: " << tag << std::endl;
 		for(int i = 0; i < row; i++){
 			(*this)[i].print(os);
 		}

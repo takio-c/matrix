@@ -157,9 +157,10 @@ public:
 	virtual Vector& print(std::ostream &os) {
 		os << "#\t";
 		for(int i = 0; i < num; i++){
+			os.width(10);
 			os << (*this)[i] << "\t";
 		}
-		os << "\t# Vector: " << tag << "\n";
+		os << "\t# Vector: " << tag << std::endl;
 		return *this;
 	}
 };
