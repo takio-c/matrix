@@ -149,6 +149,11 @@ public:
 		}
 		return d0;
 	}
+	virtual Vector cut(int o, int n) {
+		if(num < (o+n) || o < 0) throw;
+		Vector<T> d0(val+o*stp, n, stp);
+		return d0;
+	}
 
 /* debug */
 	virtual Vector& print(void) {

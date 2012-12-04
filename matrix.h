@@ -16,8 +16,8 @@ private:
 	void init(std::string name="") {
 		tag = name;
 		val = NULL;
-		pvv = 0;
-		pvh = 0;
+		pvv = NULL;
+		pvh = NULL;
 		ref = false;
 		row = 0;
 		col = 0;
@@ -103,6 +103,10 @@ public:
 	}
 	virtual ~Matrix() {
 		release();
+	}
+	static Matrix ide(int num) {
+		Matrix d0(num,num);
+		return d0.ide();
 	}
 
 /* implement */
@@ -240,6 +244,11 @@ public:
 		for(int i = 0; i < row; i++){
 			d0[i] = (*this)[i].div(v);
 		}
+		return d0;
+	}
+	virtual Matrix cut(int or, int oc, int r, int c) {
+		if(or < 0 || oc < 0 || row < (or+r) || col < (oc+c)) throw;
+		Matrix d0();
 		return d0;
 	}
 	// duo
