@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include "vector.h"
 
 template <class T>
@@ -79,6 +80,25 @@ public:
 	Matrix(T* p, const int r, const int c, const int s, const int d, std::string name="") {
 		init(name);
 		reference(p,r,c,s,d);
+	}
+	Matrix(const Matrix* p, const int ofr, const int ofc, const int r, const int c) {
+		if(p == NULL || ofr < 0 || ofc < 0 || p->row < (ofr+r) || p->col < (ofc+c)) throw;
+		std::ostringstream os(p->tag);
+		os << "[" << ofr << ":" << (ofr+row);
+		os << "[" << ofc << ":" << (ofc+col);
+		init(os.str());
+		val = p->val;
+		pvv = new Vector<T>* [p->col];
+		for(int i = 0; i < p->col; i++){
+			pvv[i] = new Vector<T>(p->pvv[i]);
+		}
+		pvh = new Vector<T>* [p->row];
+		for(int i = 0; i < p->row; i++){
+			pvh[i] = new Vector<T>(p->pvh[i]);
+		}
+		ref = true;
+		row = p->row;
+		col = p->col;
 	}
 	Matrix(const Matrix* p) {
 		if(p == NULL) throw;
@@ -246,9 +266,9 @@ public:
 		}
 		return d0;
 	}
-	virtual Matrix cut(int or, int oc, int r, int c) {
-		if(or < 0 || oc < 0 || row < (or+r) || col < (oc+c)) throw;
-		Matrix d0();
+	virtual Matrix cut(int ofr, int ofc, int r, int c) {
+		if(ofr < 0 || ofc < 0 || row < (ofr+r) || col < (ofc+c)) throw;
+		Matrix d0(1,1);
 		return d0;
 	}
 	// duo

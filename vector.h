@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <cstring>
 
 template <class T>
@@ -48,9 +49,18 @@ public:
 		init(name);
 		reference(p, n, s);
 	}
+	Vector(const Vector* p, const int o, const int n) {
+		if(p == NULL || o < 0 || n <= 0 || p->num < (o+n)) throw;
+		std::ostringstream os(p->tag);
+		os << "[" << o << ":" << (o+n) << "]";
+		init(os.str());
+		reference(p->val + p->stp*o, n, p->stp);
+	}
 	Vector(const Vector* p) {
 		if(p == NULL) throw;
-		init(p->tag);
+		std::ostringstream os(p->tag);
+		os << "[0:" << p->num << "]";
+		init(os.str());
 		reference(p->val, p->num, p->stp);
 	}
 	Vector(const Vector& o) {
@@ -151,7 +161,7 @@ public:
 	}
 	virtual Vector cut(int o, int n) {
 		if(num < (o+n) || o < 0) throw;
-		Vector<T> d0(val+o*stp, n, stp);
+		Vector<T> d0(this, o, n);
 		return d0;
 	}
 
