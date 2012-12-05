@@ -6,7 +6,7 @@ template <class T>
 class Vector {
 protected:
 	std::string	tag;
-	T*			val;
+	T			*val;
 	bool		ref;
 	int			num;
 	int			stp;
@@ -27,9 +27,9 @@ private:
 		ref = false;
 		std::memset(val, 0x00, sizeof(T)*n);
 	}
-	void reference(T* p, const int n, const int s=1) {
-		if(p == NULL || n <= 0) throw;
-		val = p;
+	void reference(T *p, const int o, const int n, const int s=1) {
+		if(p == NULL || o < 0 || n <= 0) throw;
+		val = p + o*s;
 		num = n;
 		stp = s;
 		ref = true;
@@ -45,28 +45,29 @@ public:
 		init(name);
 		create(n);
 	}
-	Vector(T* p, const int n, const int s=1, std::string name="") {
+	Vector(T *p, const int n, const int s=1, std::string name="") {
 		init(name);
-		reference(p, n, s);
+		reference(p, 0, n, s);
 	}
-	Vector(const Vector* p, const int o, const int n) {
-		if(p == NULL || o < 0 || n <= 0 || p->num < (o+n)) throw;
-		std::ostringstream os(p->tag);
-		os << "[" << o << ":" << (o+n) << "]";
-		init(os.str());
-		reference(p->val + p->stp*o, n, p->stp);
+	Vector(const Vector<T>* p, const int o, const int n) {
+		if(p == NULL || p->num < (o+n)) throw;
+		init(p->tag);
+		reference(p->val, o, n, p->stp);
 	}
-	Vector(const Vector* p) {
+	Vector(const Vector<T>* p) {
 		if(p == NULL) throw;
-		std::ostringstream os(p->tag);
-		os << "[0:" << p->num << "]";
-		init(os.str());
-		reference(p->val, p->num, p->stp);
+		init(p->tag);
+		reference(p->val, 0, p->num, p->stp);
 	}
-	Vector(const Vector& o) {
+	Vector(const Vector<T>& o) {
 		init(o.tag);
-		create(o.num);
-		*this = o;
+		if(o.ref){
+			reference(o.val, 0, o.num, o.stp);
+		}
+		else{
+			create(o.num);
+			*this = o;
+		}
 	}
 	virtual ~Vector() {
 		release();
@@ -74,14 +75,14 @@ public:
 
 /* implement */
 	// util
-	virtual Vector& SetName(std::string name) {
+	virtual Vector<T>& SetName(std::string name) {
 		tag = name;
 		return (*this);
 	}
 	virtual int Size(void) {
 		return num;
 	}
-	virtual Vector& Set(const T* p, const int s=1) {
+	virtual Vector<T>& Set(const T *p, const int s=1) {
 		if(p == NULL) throw;
 		for(int i = 0; i < num; i++){
 			(*this)[i] = *(p + s*i);
@@ -97,21 +98,21 @@ public:
 		if(i < 0 || num < i) throw;
 		return *(val + stp*i);
 	}
-	virtual const Vector& operator =(const Vector &s0) {
+	virtual const Vector<T>& operator =(const Vector<T> &s0) {
 		if(this->num != s0.num) throw;
 		for(int i = 0; i < num; i++){
 			(*this)[i] = s0[i];
 		}
 		return (*this);
 	}
-	virtual const Vector& operator +=(const Vector &s0) {
+	virtual const Vector<T>& operator +=(const Vector<T> &s0) {
 		if(this->num != s0.num) throw;
 		for(int i = 0; i < num; i++){
 			(*this)[i] += s0[i];
 		}
 		return (*this);
 	}
-	virtual const Vector& operator -=(const Vector &s0) {
+	virtual const Vector<T>& operator -=(const Vector<T> &s0) {
 		if(this->num != s0.num) throw;
 		for(int i = 0; i < num; i++){
 			(*this)[i] -= s0[i];
@@ -119,7 +120,7 @@ public:
 		return (*this);
 	}
 	// duo
-	virtual Vector operator +(const Vector &s0) {
+	virtual Vector<T> operator +(const Vector<T> &s0) {
 		if(this->num != s0.num) throw;
 		Vector<T> d0(num);
 		d0.tag = "(" + this->tag + " + " + s0.tag;
@@ -128,7 +129,7 @@ public:
 		}
 		return d0;
 	}
-	virtual Vector operator -(const Vector &s0) {
+	virtual Vector<T> operator -(const Vector<T> &s0) {
 		if(this->num != s0.num) throw;
 		Vector<T> d0(num);
 		d0.tag = "(" + this->tag + " - " + s0.tag;
@@ -137,7 +138,7 @@ public:
 		}
 		return d0;
 	}
-	virtual T operator *(const Vector &s0) {
+	virtual T operator *(const Vector<T> &s0) {
 		if(this->num != s0.num) throw;
 		T v = 0;
 		for(int i = 0; i < num; i++){
@@ -145,31 +146,31 @@ public:
 		}
 		return v;
 	}
-	virtual Vector mul(const T v) {
+	virtual Vector<T> mul(const T v) {
 		Vector<T> d0(num);
 		for(int i = 0; i < num; i++){
 			d0[i] = (*this)[i] * v;
 		}
 		return d0;
 	}
-	virtual Vector div(const T v) {
+	virtual Vector<T> div(const T v) {
 		Vector<T> d0(num);
 		for(int i = 0; i < num; i++){
 			d0[i] = (*this)[i] / v;
 		}
 		return d0;
 	}
-	virtual Vector cut(int o, int n) {
+	virtual Vector<T> cut(int o, int n) {
 		if(num < (o+n) || o < 0) throw;
 		Vector<T> d0(this, o, n);
 		return d0;
 	}
 
 /* debug */
-	virtual Vector& print(void) {
+	virtual Vector<T>& print(void) {
 		return print(std::cout);
 	}
-	virtual Vector& print(std::ostream &os) {
+	virtual Vector<T>& print(std::ostream &os) {
 		os << "#\t";
 		for(int i = 0; i < num; i++){
 			os.width(10);
